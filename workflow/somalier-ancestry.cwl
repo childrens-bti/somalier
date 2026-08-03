@@ -10,9 +10,13 @@ doc: |
 baseCommand: [bash, -c]
 
 requirements:
-  DockerRequirement:
+  - class: DockerRequirement
     dockerPull: brentp/somalier:v0.3.1
-  InlineJavascriptRequirement: {}
+  - class: InlineJavascriptRequirement
+  - class: InitialWorkDirRequirement
+    listing:
+      - entryname: query_somalier.list
+        entry: $(inputs.query_somalier.map(function(f) { return f.path; }).join("\n"))
 
 inputs:
 
@@ -43,15 +47,15 @@ arguments:
       set -euo pipefail
 
       echo "Extracting reference Somalier tar..."
-      tar -xf $(inputs.reference_tar.path)
+      tar -xf "$(inputs.reference_tar.path)"
 
       echo "Running somalier ancestry..."
       somalier ancestry \
-        --labels $(inputs.labels.path) \
-        --output-prefix $(inputs.output_prefix) \
+        --labels "$(inputs.labels.path)" \
+        --output-prefix "$(inputs.output_prefix)" \
         1kg-somalier/*.somalier \
         ++ \
-        $(inputs.query_somalier.map(f => f.path).join(" "))
+        query_somalier.list
 
 outputs:
 
